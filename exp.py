@@ -207,9 +207,10 @@ for ii in range(0,num_exp):
 
   indices = K.get_value(K.argmax(dl))
 
-  hist_df = pd.DataFrame(history.history)
-  hist_csv_file = rd+ds+"_"+str(nfeat)+"_"+str(ii)+"_history.csv"
-  with open(hist_csv_file, mode='w') as f:
-    hist_df.to_csv(f)
-  spio.savemat(rd+ds+"_"+str(nfeat)+"_"+str(ii)+'_indices.mat', {'indices': indices})
-
+    hist_csv_file = str(nfeat) + "_" + str(ii) + "_history.csv"
+    with open(hist_csv_file, mode="w") as f:
+        hist_df.to_csv(f)
+    spio.savemat(
+        str(nfeat) + "_" + str(ii) + "_indices.mat",
+        {"indices": indices},
+    )
