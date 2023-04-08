@@ -19,12 +19,8 @@ import matplotlib.pyplot as plt
 import sys
 import pandas as pd
 
-dp=sys.argv[1]
-ds=sys.argv[2]
-h_size=int(sys.argv[3])
-nfeat=int(sys.argv[4])
-rd="eta100/"
-datafile=dp+ds
+h_size = int(sys.argv[1])
+nfeat = int(sys.argv[2])
 
 num_exp=20
 num_epochs=6400
