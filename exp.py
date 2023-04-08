@@ -22,15 +22,8 @@ import pandas as pd
 h_size = int(sys.argv[1])
 nfeat = int(sys.argv[2])
 
-num_exp=20
-num_epochs=6400
-bins=10
-batch_size=8
-start_temp=10.0
-min_temp=0.01
-lossWeights = {"recon":100, "classacc":1}
-losses = {"recon": "mean_squared_error", "classacc": "categorical_crossentropy",}
-opt=RMSprop(lr=0.001, decay=0.001/num_epochs)
+num_exp = 2
+num_epochs = 100
 
 cacc=np.zeros(num_epochs)
 acc=np.zeros(num_epochs)
