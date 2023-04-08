@@ -3,7 +3,8 @@ from __future__ import print_function
 import math
 import keras
 from keras import backend as K
-#from keras.datasets import mnist
+# from keras.datasets import mnist
+from keras.datasets import fashion_mnist
 from keras.models import Sequential, Model
 from keras.layers import Layer, Dense, Dropout, Input, LeakyReLU
 from keras.layers.core import Activation
