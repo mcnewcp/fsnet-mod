@@ -19,6 +19,7 @@ import random
 import matplotlib.pyplot as plt
 import sys
 import pandas as pd
+from sklearn.datasets import make_regression
 
 h_size = int(sys.argv[1])
 nfeat = int(sys.argv[2])
@@ -29,10 +30,10 @@ bins = 10
 batch_size = 8
 start_temp = 10.0
 min_temp = 0.01
-lossWeights = {"recon": 100, "classacc": 1}
+lossWeights = {"recon": 100, "reg_output": 1}
 losses = {
     "recon": "mean_squared_error",
-    "classacc": "categorical_crossentropy",
+    "reg_output": "mean_squared_error",
 }
 opt = RMSprop(lr=0.001, decay=0.001 / num_epochs)
 
@@ -162,11 +163,8 @@ class tinyLayerD(Layer):
         return (input_shape[0], self.output_dim)
 
 
-# load, prep fashion_mnist data
-(X_2d, Y), (X_test_2d, Y_test) = fashion_mnist.load_data()
-X = np.reshape(X_2d, (X_2d.shape[0], -1))
-X_test = np.reshape(X_test_2d, (X_test_2d.shape[0], -1))
-Y = to_categorical(Y)
+# generate sample regression dataset
+X, Y = make_regression(n_samples=500, n_features=4000, n_informative=25)
 
 # Normalization to N(0,1)ds123
 
@@ -183,7 +181,7 @@ for i in range(X.shape[1]):
 for ii in range(0, num_exp):
     idx = random.sample(range(0, X.shape[0]), round(X.shape[0] * 0.5))
     x_train = X[idx, :]
-    y_train = Y[idx, :]
+    y_train = Y[idx]
     x_test = np.delete(X, idx, 0)
     y_test = np.delete(Y, idx, 0)
     x_train = np.reshape(x_train, (len(x_train), -1))
@@ -222,8 +220,7 @@ for ii in range(0, num_exp):
     x1 = LeakyReLU(0.2)(x1)
     x1 = Dropout(0.2)(x1)
     x1 = tinyLayerD(x_train.shape[1], u_train, bins, name="recon")(x1)
-    x2 = Dense(y_train.shape[1])(x)
-    x2 = Activation("softmax", name="classacc")(x2)
+    x2 = Dense(1, name="reg_output")(x)
     model = Model(inputs=inp1, outputs=[x1, x2])
     model.compile(
         optimizer=opt,
@@ -233,8 +230,8 @@ for ii in range(0, num_exp):
     )
     history = model.fit(
         x_train,
-        {"recon": x_train, "classacc": y_train},
-        validation_data=(x_test, {"recon": x_test, "classacc": y_test}),
+        {"recon": x_train, "reg_output": y_train},
+        validation_data=(x_test, {"recon": x_test, "reg_output": y_test}),
         epochs=num_epochs,
         verbose=1,
     )
