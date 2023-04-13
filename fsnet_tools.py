@@ -109,3 +109,47 @@ def get_alpha(X_train, batch_size=8, min_temp=0.01, start_temp=10.0, num_epochs=
     alpha = math.exp(math.log(min_temp / start_temp) / (num_epochs * steps_per_epoch))
     return alpha
 
+
+def build_model(
+    num_inputs,
+    nfeat,
+    u_train,
+    alpha,
+    h_size=50,
+    bins=10,
+    start_temp=10.0,
+    min_temp=0.01,
+    num_epochs=100,
+):
+    inp1 = Input(shape=(num_inputs,))
+    x = tinyLayerE(
+        nfeat, u_train, bins, start_temp, min_temp, alpha, name="tinyLayerE"
+    )(inp1)
+    x = Dense(h_size * 4)(x)
+    x = LeakyReLU(0.2)(x)
+    x = Dropout(0.2)(x)
+    x = Dense(h_size * 2)(x)
+    x = LeakyReLU(0.2)(x)
+    x = Dropout(0.2)(x)
+    x = Dense(h_size)(x)
+    x = LeakyReLU(0.2)(x)
+    x = Dropout(0.2)(x)
+    x1 = Dense(h_size * 2)(x)
+    x1 = LeakyReLU(0.2)(x1)
+    x1 = Dropout(0.2)(x1)
+    x1 = Dense(h_size * 4)(x1)
+    x1 = LeakyReLU(0.2)(x1)
+    x1 = Dropout(0.2)(x1)
+    x1 = tinyLayerD(num_inputs, u_train, bins, name="recon")(x1)
+    x2 = Dense(1, name="reg_output")(x)
+    model = Model(inputs=inp1, outputs=[x1, x2])
+    model.compile(
+        optimizer=RMSprop(lr=0.001, decay=0.001 / num_epochs),
+        loss={
+            "recon": "mean_squared_error",
+            "reg_output": "mean_squared_error",
+        },
+        loss_weights={"recon": 100, "reg_output": 1},
+        metrics=["mse"],
+    )
+    return model
