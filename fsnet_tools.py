@@ -93,3 +93,19 @@ class tinyLayerD(Layer):
 
     def compute_output_shape(self, input_shape):
         return (input_shape[0], self.output_dim)
+
+
+def get_utrain(X_train, bins=10):
+    u_train = np.zeros([X_train.shape[1], bins], dtype=float)
+    for i in range(0, X_train.shape[1]):
+        hist = np.histogram(X_train[:, i], bins)
+        for j in range(0, bins):
+            u_train[i, j] = hist[0][j] * 0.5 * (hist[1][j] + hist[1][j + 1])
+    return u_train
+
+
+def get_alpha(X_train, batch_size=8, min_temp=0.01, start_temp=10.0, num_epochs=100):
+    steps_per_epoch = (len(X_train) + batch_size - 1) // batch_size
+    alpha = math.exp(math.log(min_temp / start_temp) / (num_epochs * steps_per_epoch))
+    return alpha
+
